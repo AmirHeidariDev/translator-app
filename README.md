@@ -52,7 +52,7 @@
 ```bash
 git clone [https://github.com/amirheidaridev/translator-app.git](https://github.com/amirheidaridev/translator-app.git)
 cd translator-app
-
+```
 
 
 ---
