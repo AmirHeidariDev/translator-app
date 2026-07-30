@@ -1,16 +1,54 @@
 # translator_v2
 
-A new Flutter project.
+# 🌐 مترجم آنلاین | Translator App
 
-## Getting Started
+<p align="center">
+  <img src="https://img.shields.io/badge/Status-Under%20Development-yellow?style=for-the-badge&logo=flutter" alt="Status" />
+  <img src="https://img.shields.io/badge/Platform-Android%20%7C%20Web-blue?style=for-the-badge&logo=flutter" alt="Platform" />
+  <img src="https://img.shields.io/badge/Flutter-3.x-02569B?style=for-the-badge&logo=flutter" alt="Flutter" />
+</p>
 
-This project is a starting point for a Flutter application.
+یک اپلیکیشن مترجم کاربردی و سریع ساخته‌شده با فلاتر (Flutter) که برای پروژه‌های اندروید و وب توسعه داده شده است.
 
-A few resources to get you started if this is your first Flutter project:
+> ⚠️ **توجه:** این پروژه در حال حاضر **در حال توسعه (Under Development)** است و بخش‌های جدید به‌مرور به آن اضافه می‌شوند.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 مشاهده نسخه آنلاین (Live Demo)
+
+شما می‌توانید بدون نیاز به نصب، نسخه وب این اپلیکیشن را مستقیماً در مرورگر خود تست کنید:
+
+🌐 **[مشاهده نسخه وب مترجم](https://amirheidaridev.github.io/translator-app/)**
+
+---
+
+## 📱 دانلود نسخه‌های اندروید (Android Builds)
+
+آخرین نسخه‌های کامپایل‌شده اپلیکیشن بر اساس معماری پردازنده گوشی شما در بخش **Releases** قابل دانلود هستند:
+
+* ⚡ **`arm64-v8a`**: مخصوص بیشتر گوشی‌های اندرویدی جدید و ۶۴ بیتی (پیشنهاد اصلی)
+* 📱 **`armeabi-v7a`**: مخصوص گوشی‌های قدیمی‌تر ۳۲ بیتی
+* 💻 **`x86_64`**: مخصوص شبیه‌سازها (Emulators) و برخی تبلت‌ها
+
+👉 **[رفتـن به صفـحه دانلود آخرین نسخه‌ها (Releases)](https://github.com/amirheidaridev/translator-app/releases)**
+
+---
+
+## ✨ ویژگی‌ها (Features)
+
+- [x] پشتیبانی از پلتفرم‌های **Android** و **Web**
+- [x] ساخت خودکار و یکپارچه نسخه‌ها با **GitHub Actions (CI/CD)**
+- [x] انتشار خودکار نسخه وب روی **GitHub Pages**
+- [x] خروجی مجزا بر اساس معماری پردازنده برای کاهش حجم برنامه
+- [ ] *امکانات بیشتر در دست توسعه...*
+
+---
+
+## 🛠️ راهنمای اجرا روی سیستم شخصی
+
+اگر می‌خواهید پروژه را روی سیستم خود اجرا و ویرایش کنید:
+
+۱. **کلون کردن ریپازیتوری:**
+```bash
+git clone [https://github.com/amirheidaridev/translator-app.git](https://github.com/amirheidaridev/translator-app.git)
+cd translator-app
