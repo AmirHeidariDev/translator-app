@@ -7,6 +7,6 @@ String languageErrorMesage({required LanguageError error}) {
     case LanguageError.connotSwapWhenAuto:
       return "وقتی زبان روی تشخیص خودکار است جابجایی ممکن نیست";
     case LanguageError.sameSourceAndTarget:
-      return "زبان مبدا و مقصد نباید یکسان باشد ";
+      return "زبان مبدا و مقصد نباید یکسان باشد";
   }
 }
