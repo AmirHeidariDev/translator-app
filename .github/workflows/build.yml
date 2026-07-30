@@ -1,10 +1,12 @@
-name: Build Signed Release APKs (Per ABI)
+name: Build, Artifact & Publish Release
 
 on:
   push:
     branches:
       - main
       - master
+    tags:
+      - 'v*' # مثل v1.0.0
 
 jobs:
   build:
@@ -20,10 +22,24 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
+      # ۱. تنظیم فلاتر همراه با فعال‌سازی کَش داخلی
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
+          cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
+
+      # ۲. ذخیره و بازگردانی Gradle Cache (افزایش چشمگیر سرعت build)
+      - name: Cache Gradle packages
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('/*.gradle*', '/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Install dependencies
         run: flutter pub get
@@ -39,27 +55,37 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      # ساخت خروجی تفکیک‌شده برای هر معماری
+      # ۳. ساخت خروجی‌های تفکیک‌شده بر اساس معماری
       - name: Build Split APKs
         run: flutter build apk --release --split-per-abi
 
-      # آپلود جداگانه APK معماری ARM 64-bit (گوشی‌های جدید)
-      - name: Upload ARM64 APK
+      # ۴. آپلود تک‌تک APKها در بخش Artifacts
+      - name: Upload ARM64 APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: app-arm64-v8a-release
           path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
-      # آپلود جداگانه APK معماری ARM 32-bit (گوشی‌های قدیمی)
-      - name: Upload ARM32 APK
+      - name: Upload ARM32 APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: app-armeabi-v7a-release
           path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
-      # آپلود جداگانه APK معماری x86_64 (شبیه‌سازها)
-      - name: Upload x86_64 APK
+      - name: Upload x86_64 APK to Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: app-x86_64-release
           path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+
+      # ۵. ایجاد Release رسمی در گیت‌هاب (هنگام Tag زدن)
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+            build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+            build/app/outputs/flutter-apk/app-x86_64-release.apk
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
