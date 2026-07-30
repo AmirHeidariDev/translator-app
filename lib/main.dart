@@ -27,7 +27,7 @@ class _MyAppState extends ConsumerState<MyApp> {
   Widget build(BuildContext context) {
     final themeMode = ref.watch(themeModeProvider);
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Flutter translator ',
       themeAnimationStyle: AnimationStyle(duration: Duration(milliseconds: 350), curve: Curves.easeInOutExpo),
       theme: ThemeDataHelper.lightTheme,
       darkTheme: ThemeDataHelper.darkTheme,
