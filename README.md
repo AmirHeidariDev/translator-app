@@ -52,3 +52,25 @@
 ```bash
 git clone [https://github.com/amirheidaridev/translator-app.git](https://github.com/amirheidaridev/translator-app.git)
 cd translator-app
+
+
+
+---
+
+## 📬 ارتباط با من (Contact & Socials)
+
+<p align="center">
+  <a href="https://github.com/AmirHeidariDev">
+    <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white" alt="GitHub" />
+  </a>
+  <a href="https://t.me/AmirHeidari_Dev">
+    <img src="https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram" />
+  </a>
+  <a href="https://www.instagram.com/AmirHeidari_Dev">
+    <img src="https://img.shields.io/badge/Instagram-E4405F?style=for-the-badge&logo=instagram&logoColor=white" alt="Instagram" />
+  </a>
+</p>
+
+<p align="center">
+  Developed with ❤️ by <b>Amir Heidari</b>
+</p>
