@@ -1,4 +1,4 @@
-package com.example.translator_v2
+package top.translate.amir
 
 import io.flutter.embedding.android.FlutterActivity
 
