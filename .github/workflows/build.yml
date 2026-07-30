@@ -1,4 +1,4 @@
-name: Build Signed Release APK
+name: Build Signed Release APKs (Per ABI)
 
 on:
   push:
@@ -39,11 +39,27 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      - name: Build Signed APK
-        run: flutter build apk --release
+      # ساخت خروجی تفکیک‌شده برای هر معماری
+      - name: Build Split APKs
+        run: flutter build apk --release --split-per-abi
 
-      - name: Upload APK to Actions Artifacts
+      # آپلود جداگانه APK معماری ARM 64-bit (گوشی‌های جدید)
+      - name: Upload ARM64 APK
         uses: actions/upload-artifact@v4
         with:
-          name: release-signed-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+          name: app-arm64-v8a-release
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+
+      # آپلود جداگانه APK معماری ARM 32-bit (گوشی‌های قدیمی)
+      - name: Upload ARM32 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-armeabi-v7a-release
+          path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+
+      # آپلود جداگانه APK معماری x86_64 (شبیه‌سازها)
+      - name: Upload x86_64 APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-x86_64-release
+          path: build/app/outputs/flutter-apk/app-x86_64-release.apk
