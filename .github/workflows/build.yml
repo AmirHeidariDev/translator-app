@@ -1,4 +1,4 @@
-name: Build, Artifact & Publish Release
+name: Build Android & Deploy Flutter Web to GitHub Pages
 
 on:
   push:
@@ -8,8 +8,20 @@ on:
     tags:
       - 'v*' # مثل v1.0.0
 
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
 jobs:
-  build:
+  build-and-deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
 
     steps:
@@ -22,7 +34,7 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # ۱. تنظیم فلاتر همراه با فعال‌سازی کَش داخلی
+      # ۱. تنظیم فلاتر همراه با کَش
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -30,7 +42,7 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
 
-      # ۲. ذخیره و بازگردانی Gradle Cache (افزایش چشمگیر سرعت build)
+      # ۲. ذخیره و بازگردانی Gradle Cache
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -55,30 +67,54 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      # ۳. ساخت خروجی‌های تفکیک‌شده بر اساس معماری
+      # ۳. ساخت خروجی‌های اندروید
       - name: Build Split APKs
         run: flutter build apk --release --split-per-abi
 
-      # ۴. آپلود تک‌تک APKها در بخش Artifacts
-      - name: Upload ARM64 APK to Artifacts
+      # ۴. ساخت خروجی وب (تنظیم base-href بر اساس اسم ریپازیتوری برای لود صحیح اسکریپت‌ها)
+      - name: Build Flutter Web
+        run: flutter build web --release --base-href /${{ github.event.repository.name }}/
+
+      # ۵. فشرده‌سازی خروجی وب جهت آپلود
+      - name: Zip Web Output
+        run: |
+          cd build/web
+          zip -r ../../web-release.zip .
+          cd ../..
+
+      # ۶. پیکربندی و انتشار خودکار روی GitHub Pages
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload artifact for GitHub Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'build/web'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      # ۷. آپلود APKها در Artifacts
+      - name: Upload ARM64 APK
         uses: actions/upload-artifact@v4
         with:
           name: app-arm64-v8a-release
           path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
 
-      - name: Upload ARM32 APK to Artifacts
+      - name: Upload ARM32 APK
         uses: actions/upload-artifact@v4
         with:
           name: app-armeabi-v7a-release
           path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
 
-      - name: Upload x86_64 APK to Artifacts
+      - name: Upload x86_64 APK
         uses: actions/upload-artifact@v4
         with:
           name: app-x86_64-release
           path: build/app/outputs/flutter-apk/app-x86_64-release.apk
 
-      # ۵. ایجاد Release رسمی در گیت‌هاب (هنگام Tag زدن)
+      # ۸. انتشار رسمی در Releases هنگام Tag زدن
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
@@ -87,5 +123,6 @@ jobs:
             build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
             build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
             build/app/outputs/flutter-apk/app-x86_64-release.apk
+            web-release.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
