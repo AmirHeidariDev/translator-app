@@ -1,7 +1,6 @@
 name: Build, Deploy Web & Create Release
 
 on:
-  # قابلیت اجرای دستی از تب Actions
   workflow_dispatch:
     inputs:
       version:
@@ -16,11 +15,16 @@ permissions:
 
 concurrency:
   group: "pages"
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+    
+    # اضافه شدن محیط دپلوی برای فعال‌سازی کامل لینک GitHub Pages
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -32,7 +36,6 @@ jobs:
           distribution: 'zulu'
           java-version: '17'
 
-      # ۱. تنظیم فلاتر همراه با کَش
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
@@ -40,7 +43,6 @@ jobs:
           cache: true
           cache-key: "flutter-:os:-:channel:-:version:-:arch:-:hash:"
 
-      # ۲. کش کردن پکیج‌های گریدل
       - name: Cache Gradle packages
         uses: actions/cache@v3
         with:
@@ -65,22 +67,22 @@ jobs:
           echo "keyAlias=${{ secrets.KEY_ALIAS }}" >> android/key.properties
           echo "storeFile=upload-keystore.jks" >> android/key.properties
 
-      # ۳. ساخت خروجی‌های اندروید
+      # ۱. ساخت خروجی‌های اندروید
       - name: Build Split APKs
         run: flutter build apk --release --split-per-abi
 
-      # ۴. ساخت خروجی وب
+      # ۲. ساخت خروجی وب
       - name: Build Flutter Web
         run: flutter build web --release --base-href /${{ github.event.repository.name }}/
 
-      # ۵. زیپ کردن خروجی وب
+      # ۳. زیپ کردن خروجی وب
       - name: Zip Web Output
         run: |
           cd build/web
           zip -r ../../web-release.zip .
           cd ../..
 
-      # ۶. دپلوی روی GitHub Pages
+      # ۴. تنظیمات و آپلود برای GitHub Pages
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
@@ -89,11 +91,12 @@ jobs:
         with:
           path: 'build/web'
 
+      # ۵. انتشار زنده روی GitHub Pages
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
 
-      # ۷. ساخت Release رسمی در گیت‌هاب با ورژنی که دستی وارد کردی
+      # ۶. ساخت Release رسمی در گیت‌هاب
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v1
         with:
