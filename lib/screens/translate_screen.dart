@@ -4,6 +4,7 @@ import 'package:loading_animation_widget/loading_animation_widget.dart';
 import 'package:translator_v2/consts/language_error_mesage.dart';
 import 'package:translator_v2/consts/languages_list.dart';
 import 'package:translator_v2/controllers/language_controller.dart';
+import 'package:translator_v2/controllers/translate_controller.dart';
 import 'package:translator_v2/models/language_model.dart';
 import 'package:translator_v2/providers/language_provider.dart';
 import 'package:translator_v2/providers/theme_mode_provider.dart';
@@ -23,7 +24,8 @@ class _TranslateScreenState extends ConsumerState<TranslateScreen> {
     super.initState();
   }
 
-  TextEditingController textEditingController = TextEditingController();
+  TextEditingController textEditingInPuotController = TextEditingController();
+  TextEditingController textEditingOutPuotController = TextEditingController();
 
   void _showError(BuildContext context, LanguageError error) {
     ScaffoldMessenger.of(context).showSnackBar(
@@ -43,18 +45,22 @@ class _TranslateScreenState extends ConsumerState<TranslateScreen> {
     final themeMode = ref.watch(themeModeProvider);
 
     final langState = ref.watch(languageProvider);
-    final translateState = ref.watch(translateProvider);
 
     final longController = ref.read(languageProvider.notifier);
     final translateController = ref.read(translateProvider.notifier);
 
+    ref.listen<TranslateState>(
+      translateProvider,
+      (previous, next) => textEditingOutPuotController.text = next.output,
+    );
+
     return Scaffold(
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.all(20),
-          child: SizedBox(
-            height: MediaQuery.of(context).size.height,
-            child: SingleChildScrollView(
+        child: SizedBox(
+          height: MediaQuery.of(context).size.height,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,7 +106,12 @@ class _TranslateScreenState extends ConsumerState<TranslateScreen> {
                             onTap: () {
                               final error = ref.read(languageProvider.notifier).swap();
 
-                              if (error != null) {
+                              if (error == null) {
+                                ref.read(translateProvider.notifier).swopTexts();
+                                final res = ref.watch(translateProvider);
+                                textEditingInPuotController.text = res.input;
+                                textEditingOutPuotController.text = res.output;
+                              } else {
                                 _showError(context, error);
                               }
                             },
@@ -147,13 +158,18 @@ class _TranslateScreenState extends ConsumerState<TranslateScreen> {
                       height: 200,
                       width: double.infinity,
                       child: TextField(
-                        controller: textEditingController,
-                        textDirection: TextDirection.rtl,
+                        controller: textEditingInPuotController,
+                        textDirection: langState.from == "fa" || langState.from == "ar"
+                            ? TextDirection.rtl
+                            : TextDirection.ltr,
                         decoration: InputDecoration(
                           hint: Text('Enter your text'),
                           border: OutlineInputBorder(borderSide: BorderSide.none),
                         ),
                         onChanged: (value) {
+                          if (value.trim().isEmpty) {
+                            textEditingOutPuotController.text = "";
+                          }
                           translateController.onTextChanged(value);
                         },
                       ),
@@ -163,19 +179,37 @@ class _TranslateScreenState extends ConsumerState<TranslateScreen> {
                     child: SizedBox(
                       height: 200,
                       width: double.infinity,
-                      child: TextField(
-                        decoration: InputDecoration(
-                          hint: translateState.isLoading
-                              ? LoadingAnimationWidget.staggeredDotsWave(color: Colors.red, size: 35)
-                              : Text(translateState.output),
-                          border: OutlineInputBorder(borderSide: BorderSide.none),
-                        ),
-                        onChanged: (value) {
-                          translateController.onTextChanged(value);
-                        },
+                      child: Stack(
+                        children: [
+                          TextField(
+                            controller: textEditingOutPuotController,
+                            textDirection: langState.from == "fa" || langState.from == "ar"
+                                ? TextDirection.ltr
+                                : TextDirection.rtl,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(borderSide: BorderSide.none),
+                            ),
+                            readOnly: true,
+                            onChanged: (value) {
+                              translateController.onTextChanged(value);
+                            },
+                          ),
+                          if (ref.watch(translateProvider).isLoading)
+                            Container(
+                              width: double.infinity,
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(12),
+                                color: Colors.white,
+                              ),
+                              child: Center(
+                                child: LoadingAnimationWidget.staggeredDotsWave(color: Colors.lime, size: 70),
+                              ),
+                            ),
+                        ],
                       ),
                     ),
                   ),
+
                   SizedBox(height: MediaQuery.of(context).size.height / 4.5),
                   Center(
                     child: SegmentedButton<ThemeMode>(

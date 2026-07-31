@@ -50,7 +50,7 @@ class TranslateController extends Notifier<TranslateState> {
       state = state.copyWith(output: '', isLoading: false);
     }
 
-    _debounce = Timer(Duration(milliseconds: 400), () => translateNow());
+    _debounce = Timer(Duration(milliseconds: 50), () => translateNow());
   }
 
   Future<void> translateNow() async {
